@@ -314,6 +314,20 @@ const EmployeesWithAttendance = () => {
     })
   }
 
+  const formatDuration = (checkIn: string | null, checkOut: string | null) => {
+    if (!checkIn || !checkOut) return 'N/A'
+    const start = new Date(checkIn)
+    const end = new Date(checkOut)
+    const diffMs = end.getTime() - start.getTime()
+    if (Number.isNaN(diffMs) || diffMs < 0) return 'N/A'
+
+    const totalMinutes = Math.floor(diffMs / 60000)
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
+
+    return `${hours}h ${minutes.toString().padStart(2, '0')}m`
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'present':
@@ -603,6 +617,7 @@ const EmployeesWithAttendance = () => {
                   <th className="p-4 text-left text-sm font-semibold text-gray-900">Date</th>
                   <th className="p-4 text-left text-sm font-semibold text-gray-900">Check In</th>
                   <th className="p-4 text-left text-sm font-semibold text-gray-900">Check Out</th>
+                  <th className="p-4 text-left text-sm font-semibold text-gray-900">Total Time</th>
                   <th className="p-4 text-left text-sm font-semibold text-gray-900">Status</th>
                    
                 </tr>
@@ -655,6 +670,11 @@ const EmployeesWithAttendance = () => {
                     <td className="p-4">
                       <div className={`font-mono font-medium ${record?.checkOut ? 'text-blue-600' : 'text-gray-400'}`}>
                         {formatTime(record?.checkOut)}
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="font-mono font-medium text-gray-700">
+                        {formatDuration(record?.checkIn, record?.checkOut)}
                       </div>
                     </td>
                     <td className="p-4">

@@ -59,7 +59,20 @@ const employeeSchema = new mongoose.Schema({
         }
     },
     salary: {
-        type: Number
+        type: Number,
+        default: 0
+    },
+    hourlyRate: {
+        type: Number,
+        default: 0
+    },
+    requiredHoursPerMonth: {
+        type: Number,
+        default: 160 // Standard 160 hours per month
+    },
+    overtimeRate: {
+        type: Number,
+        default: 0
     },
     password:{
      type: String

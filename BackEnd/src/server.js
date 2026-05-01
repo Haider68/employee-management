@@ -10,6 +10,7 @@ import {v2 as cloudinary} from "cloudinary";
 import projectRouter from "./routers/projectRoutes.js";
 import attendenceRouter from "./routers/attendanceRoutes.js";
 import leaveRouter from "./routers/leaveRoutes.js";
+import salaryRouter from "./routers/salaryRoutes.js";
 const app = express();
   app.use(cors({
     origin: ["http://localhost:3000"],
@@ -45,6 +46,7 @@ app.use("/api/v1/employee", employeeRouter);
 app.use("/api/v1/project", projectRouter);
 app.use("/api/v1/attendence", attendenceRouter);
 app.use("/api/v1/leave", leaveRouter);
+app.use("/api/v1/salary", salaryRouter);
 app.use((err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";

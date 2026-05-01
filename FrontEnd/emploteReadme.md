@@ -73,7 +73,7 @@ Now open `http://localhost:3000` in your browser.
 ---
 
 ## 💰 Pricing
-- **Basic Project** – ₹99 (One-time)  
+- **Basic Project** – RS.99 (One-time)  
 - **Upgrade Package** – functionality Based Charges (Includes: Customization, Hosting Setup, Deployment Support)  
   > *Hosting cost is purchased separately by the user. We provide deployment support once hosting is available.*
 

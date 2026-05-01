@@ -29,6 +29,7 @@ const allSidebarItems = [
   { name: "Attendance", href: "/dashboard/attendance", icon: Calendar },
   { name: "Leave Management", href: "/dashboard/leave-management", icon: ClipboardList },
   { name: "Projects", href: "/dashboard/projects", icon: Briefcase },
+  { name: "Salary Management", href: "/dashboard/salary", icon: ClipboardList },
   { name: "About Us", href: "/dashboard/about", icon: FileText },
   { name: "Contact Us", href: "/dashboard/contact", icon: FileText },
   // { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
@@ -38,6 +39,7 @@ const allSidebarItems = [
 const employeeSidebarItems = [
   { name: "Mark Attendance", href: "/dashboard/attendance", icon: Calendar },
   { name: "Leave Management", href: "/dashboard/leave-management", icon: ClipboardList },
+  { name: "My Salary", href: "/dashboard/salary", icon: ClipboardList },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
 

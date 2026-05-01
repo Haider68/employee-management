@@ -323,10 +323,10 @@ function DashboardContent() {
         />
         <StatCard
           title="Total Budget"
-          value={`₹${(stats.totalBudget / 100000).toFixed(1)}L`}
+          value={`RS.${(stats.totalBudget / 100000).toFixed(1)}L`}
           gradientFrom="from-amber-600"
           gradientTo="to-orange-600"
-          icon={<IndianRupee className="h-5 w-5" />}
+          // icon={<IndianRupee className="h-5 w-5" />}
           subtext={`${stats.highPriorityProjects} high priority projects`}
         />
       </div>
@@ -389,7 +389,7 @@ function DashboardContent() {
             </div>
             <div className="mt-3 flex justify-between items-center">
               <span className="text-xs text-muted-foreground">Total Budget</span>
-              <span className="text-sm font-semibold">₹{(stats.totalBudget / 100000).toFixed(1)}L</span>
+              <span className="text-sm font-semibold">RS.{(stats.totalBudget / 100000).toFixed(1)}L</span>
             </div>
           </CardContent>
         </Card>
@@ -495,7 +495,7 @@ function DashboardContent() {
                   <div className="grid grid-cols-3 gap-4 mb-3">
                     <div className="flex items-center gap-1.5">
                       <DollarSign className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                      <span className="text-xs font-medium">₹{(project.budget / 100000).toFixed(1)}L</span>
+                      <span className="text-xs font-medium">RS.{(project.budget / 100000).toFixed(1)}L</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Timer className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400" />

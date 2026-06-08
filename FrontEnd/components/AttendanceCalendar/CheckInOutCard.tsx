@@ -243,14 +243,14 @@ export const CheckInOutCard = ({
               </div>
               
               <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <Button 
+                {/* <Button 
                   onClick={handleCheckInClick}
                   size="lg"
                   className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white gap-3 h-14 text-base font-semibold shadow-lg shadow-green-500/25 transition-transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <LogIn className="w-5 h-5" />
                   Check In Now
-                </Button>
+                </Button> */}
                 
                 <Button 
                   onClick={onMarkAbsent}

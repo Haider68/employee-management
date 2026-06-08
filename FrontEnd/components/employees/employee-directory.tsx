@@ -312,7 +312,7 @@ function AddEmployeeForm({
             name="fullName"
             value={formData.fullName}
             onChange={handleInputChange}
-            placeholder="John Doe"
+            placeholder="Name"
             disabled={loading}
             suppressHydrationWarning
           />
@@ -331,7 +331,7 @@ function AddEmployeeForm({
             type="email"
             value={formData.email}
             onChange={handleInputChange}
-            placeholder="john@example.com"
+            placeholder="xyz@example.com"
             disabled={loading}
             suppressHydrationWarning
           />
@@ -810,7 +810,7 @@ function EditEmployeeForm({
             name="fullName"
             value={formData.fullName}
             onChange={handleInputChange}
-            placeholder="John Doe"
+            placeholder="Name"
             disabled={loading}
             suppressHydrationWarning
           />

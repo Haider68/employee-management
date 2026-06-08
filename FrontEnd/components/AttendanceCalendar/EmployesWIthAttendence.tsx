@@ -78,10 +78,33 @@ const EmployeesWithAttendance = () => {
   const [currentDate] = useState(new Date())
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
-  const [dateFilter, setDateFilter] = useState('today')
+  const [dateFilter, setDateFilter] = useState('all')
 
   console.log("filteredData",filteredData);
-  
+
+  const extractAttendanceArray = (response: unknown): Attendance[] => {
+    const payload = response as any
+
+    // Support multiple response shapes from backend/services
+    const candidates = [
+      payload?.data?.attendance,
+      payload?.data?.attendanceRecords,
+      payload?.data?.data?.attendance,
+      payload?.data?.data?.attendanceRecords,
+      payload?.data?.data,
+      payload?.data,
+      payload?.attendance
+    ]
+
+    for (const candidate of candidates) {
+      if (Array.isArray(candidate)) {
+        return candidate as Attendance[]
+      }
+    }
+
+    return []
+  }
+
   // Confirmation Modal State
   const [confirmationModal, setConfirmationModal] = useState<ConfirmationModal>({
     isOpen: false,
@@ -106,13 +129,13 @@ const EmployeesWithAttendance = () => {
     try {
       const response = await getAllAttendance({})  
       console.log("res11",response);
-      const data = response as ApiResponse
-      if (data.success) {
-        setAttendanceData(data.data.attendance)
-        setFilteredData(data.data.attendance)
-      }
+      const records = extractAttendanceArray(response)
+      setAttendanceData(records)
+      setFilteredData(records)
     } catch (error) {
       console.error('Error fetching attendance:', error)
+      setAttendanceData([])
+      setFilteredData([])
     } finally {
       setLoading(false)
     }
@@ -358,7 +381,8 @@ const EmployeesWithAttendance = () => {
 
   const getTodayStats = () => {
     const today = new Date().toDateString()
-    const todayRecords = attendanceData.filter(record => 
+    const source = Array.isArray(attendanceData) ? attendanceData : []
+    const todayRecords = source.filter(record => 
       new Date(record.date).toDateString() === today
     )
     
@@ -581,7 +605,7 @@ const EmployeesWithAttendance = () => {
                   onClick={() => {
                     setSearchTerm('')
                     setStatusFilter('all')
-                    setDateFilter('today')
+                    setDateFilter('all')
                   }}
                 >
                   Clear Filters
@@ -694,7 +718,7 @@ const EmployeesWithAttendance = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-900">No attendance records found</h3>
               <p className="text-gray-600 mt-2">
-                {searchTerm || statusFilter !== 'all' || dateFilter !== 'today' 
+                {searchTerm || statusFilter !== 'all' || dateFilter !== 'all' 
                   ? 'Try adjusting your filters' 
                   : 'No records available for the selected period'}
               </p>

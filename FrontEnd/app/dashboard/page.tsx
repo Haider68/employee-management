@@ -108,6 +108,19 @@ function DashboardContent() {
     fetchDashboardData()
   }, [])
 
+  // Tolerant extractor: returns the first array we find in the response
+  // under any of the candidate keys (or the response itself if it's an array).
+  // Handles both Node-style and .NET-style API shapes.
+  const extractArray = (res: any, ...keys: string[]): any[] => {
+    if (Array.isArray(res)) return res
+    if (Array.isArray(res?.data)) return res.data
+    for (const k of keys) {
+      if (Array.isArray(res?.data?.[k])) return res.data[k]
+      if (Array.isArray(res?.[k])) return res[k]
+    }
+    return []
+  }
+
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
@@ -119,10 +132,10 @@ function DashboardContent() {
       ])
 
       // Process Employees Data
-      if (employeesRes.success) {
-        const employees = employeesRes.data.employees || employeesRes.data || []
+      {
+        const employees = extractArray(employeesRes, 'employees')
         setRecentEmployees(employees.slice(0, 5))
-        
+
         const total = employees.length
         const active = employees.filter((emp: any) => emp.status === 'active').length
         const onLeave = employees.filter((emp: any) => emp.status === 'onleave').length
@@ -141,12 +154,12 @@ function DashboardContent() {
           newHires: newHires
         }))
       }
-    
+
       // Process Projects Data
-      if (projectsRes.success) {
-        const projects = projectsRes.data || []
+      {
+        const projects = extractArray(projectsRes, 'projects')
         console.log("Projects data:", projects)
-        
+
         setRecentProjects(projects.slice(0, 4))
         
         const total = projects.length
@@ -185,14 +198,15 @@ function DashboardContent() {
       }
 
       // Process Attendance Data
-      if (attendanceRes.success) {
-        const attendance = attendanceRes.data.attendance || attendanceRes.data || []
+      {
+        const attendance = extractArray(attendanceRes, 'attendanceRecords', 'attendance')
         const today = new Date().toISOString().split('T')[0]
-        
-        const todayAttendance = attendance.filter((att: any) => 
-          att.date?.split('T')[0] === today
-        )
-        
+
+        const todayAttendance = attendance.filter((att: any) => {
+          const dateStr = typeof att?.date === 'string' ? att.date : ''
+          return dateStr.split('T')[0] === today
+        })
+
         const present = todayAttendance.filter((att: any) => att.status === 'present').length
         const absent = todayAttendance.filter((att: any) => att.status === 'absent').length
         const late = todayAttendance.filter((att: any) => att.status === 'late').length
@@ -323,7 +337,7 @@ function DashboardContent() {
         />
         <StatCard
           title="Total Budget"
-          value={`RS.${(stats.totalBudget / 100000).toFixed(1)}L`}
+          value={`RS.${(stats.totalBudget / 100000).toFixed(1)}`}
           gradientFrom="from-amber-600"
           gradientTo="to-orange-600"
           // icon={<IndianRupee className="h-5 w-5" />}
@@ -358,9 +372,16 @@ function DashboardContent() {
             <div className="mt-3">
               <div className="flex justify-between text-xs mb-1">
                 <span>Progress</span>
-                <span className="font-medium">{Math.round((stats.completedProjects / stats.totalProjects) * 100)}%</span>
+                <span className="font-medium">
+                  {stats.totalProjects > 0
+                    ? Math.round((stats.completedProjects / stats.totalProjects) * 100)
+                    : 0}%
+                </span>
               </div>
-              <Progress value={(stats.completedProjects / stats.totalProjects) * 100} className="h-2" />
+              <Progress
+                value={stats.totalProjects > 0 ? (stats.completedProjects / stats.totalProjects) * 100 : 0}
+                className="h-2"
+              />
             </div>
           </CardContent>
         </Card>
@@ -389,7 +410,7 @@ function DashboardContent() {
             </div>
             <div className="mt-3 flex justify-between items-center">
               <span className="text-xs text-muted-foreground">Total Budget</span>
-              <span className="text-sm font-semibold">RS.{(stats.totalBudget / 100000).toFixed(1)}L</span>
+              <span className="text-sm font-semibold">RS.{(stats.totalBudget / 100000).toFixed(1)}</span>
             </div>
           </CardContent>
         </Card>
@@ -413,8 +434,8 @@ function DashboardContent() {
         <CardContent className="pt-4">
           <div className="grid gap-3 md:grid-cols-2">
             {recentEmployees.length > 0 ? (
-              recentEmployees.map((emp: any) => (
-                <div key={emp._id} className="flex items-center justify-between p-3 bg-white dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800 hover:shadow-md transition-all duration-200">
+              recentEmployees.map((emp: any, idx: number) => (
+                <div key={emp.id ?? emp._id ?? idx} className="flex items-center justify-between p-3 bg-white dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800 hover:shadow-md transition-all duration-200">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12 border-2 border-sky-200 dark:border-sky-800">
                       <AvatarImage src={emp.avatar?.url} alt={emp.fullName} />
@@ -468,8 +489,8 @@ function DashboardContent() {
         <CardContent className="pt-4">
           <div className="space-y-4">
             {recentProjects.length > 0 ? (
-              recentProjects.map((project: any) => (
-                <div key={project._id} className="p-4 bg-white dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-200">
+              recentProjects.map((project: any, idx: number) => (
+                <div key={project.id ?? project._id ?? idx} className="p-4 bg-white dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-200">
                   {/* Project Header */}
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-start gap-3">
@@ -519,7 +540,7 @@ function DashboardContent() {
                       <div className="flex items-center mt-2">
                         <div className="flex -space-x-2">
                           {project.teamMembers.slice(0, 4).map((member: any, idx: number) => (
-                            <Avatar key={member._id || idx} className="h-8 w-8 border-2 border-white dark:border-gray-900">
+                            <Avatar key={member.id ?? member._id ?? idx} className="h-8 w-8 border-2 border-white dark:border-gray-900">
                               <AvatarImage src={member.avatar?.url} alt={member.fullName} />
                               <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white text-xs">
                                 {getInitials(member.fullName || member.name || 'M')}

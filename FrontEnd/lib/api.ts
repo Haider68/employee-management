@@ -1,11 +1,56 @@
  
  import api from "@/components/service/axiosInstance";
+
+function extractValidationMessage(data: Record<string, unknown> | undefined): string | undefined {
+  if (!data) return undefined;
+
+  const msg = data.message ?? data.Message;
+  if (typeof msg === "string" && msg) return msg;
+
+  const title = data.title;
+  if (typeof title === "string" && title) return title;
+
+  const errors = data.errors;
+  if (Array.isArray(errors) && errors.length > 0) {
+    const first = errors[0] as { msg?: string; message?: string } | string;
+    if (typeof first === "string") return first;
+    return first?.msg ?? first?.message;
+  }
+  if (errors && typeof errors === "object") {
+    for (const key of Object.keys(errors)) {
+      const val = (errors as Record<string, unknown>)[key];
+      if (Array.isArray(val) && val.length > 0) return String(val[0]);
+      if (typeof val === "string") return val;
+    }
+  }
+  return undefined;
+}
+
+export function getApiErrorMessage(error: unknown, fallback: string): string {
+  if (typeof error === "string" && error) return error;
+  if (error instanceof Error && error.message) return error.message;
+
+  const axiosError = error as { response?: { data?: Record<string, unknown> }; message?: string };
+  const fromData = extractValidationMessage(axiosError?.response?.data);
+  if (fromData) return fromData;
+
+  if (!axiosError?.response) {
+    return "Unable to reach the server. Check that the API is running.";
+  }
+
+  if (typeof axiosError?.message === "string" && axiosError.message) {
+    return axiosError.message;
+  }
+
+  return fallback;
+}
+
 const handleApi = async (promise: Promise<any>) => {
    try {
        const response = await promise
       return  response;
-   }  catch (error: any) {
-      throw error?.response?.data?.message || error;
+   }  catch (error: unknown) {
+      throw new Error(getApiErrorMessage(error, "Request failed"));
    }
 };
 
@@ -234,8 +279,15 @@ export const getAttendanceByDateRange = async(employeeId: any, startDate: any, e
 // ==================== Leave Management =====================
 
 // Create leave request
-export const createLeaveRequest = async (formData:any) => {
-    return handleApi(postData('/leave/create-leave', formData));
+export const createLeaveRequest = async (formData: any) => {
+    const payload = {
+        leaveType: formData.leave_type,
+        startDate: formData.start_date,
+        endDate: formData.end_date,
+        reason: formData.reason,
+        numberOfDays: formData.number_of_days,
+    };
+    return handleApi(postData('/leave/create-leave', payload));
 }
 
 
@@ -323,22 +375,32 @@ export const approveLeaveRequest = async (leaveId:string) => {
 }
 
 // Reject leave request
-export const rejectLeaveRequest = async (leaveId:string, rejectionReason:any) => {
-    const formData = { rejection_reason: rejectionReason };
-    return handleApi(putDataWIthId(`/leave/${leaveId}/reject`, formData));
+export const rejectLeaveRequest = async (leaveId: string, rejectionReason: string) => {
+    return handleApi(
+        putDataWIthId(`/leave/${leaveId}/reject`, { rejectionReason })
+    );
 }
 
 // Bulk process leaves (approve/reject multiple)
-export const bulkProcessLeaves = async (leaveIds:any, action : any, rejectionReason :any) => {
-    const formData = {
-        leave_ids: leaveIds,
-        action: action
+export const bulkProcessLeaves = async (
+    leaveIds: (string | number)[],
+    action: string,
+    rejectionReason?: string
+) => {
+    const payload: {
+        leaveIds: number[];
+        action: string;
+        rejectionReason?: string;
+    } = {
+        leaveIds: leaveIds.map((id) => Number(id)),
+        action,
     };
-    
-    if (action === 'reject' && rejectionReason) {
-        formData.rejection_reason = rejectionReason;
+
+    if (action === "reject" && rejectionReason) {
+        payload.rejectionReason = rejectionReason;
     }
-    return handleApi(postData('/leave/bulk-process', formData));
+
+    return handleApi(postData("/leave/bulk-process", payload));
 }
 
 

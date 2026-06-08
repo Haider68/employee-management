@@ -352,7 +352,7 @@ export function LoginForm({ className }: { className?: string }) {
                       <Input
                         id="fullName"
                         type="text"
-                        placeholder="John Doe"
+                        placeholder="Name"
                         value={signupForm.fullName}
                         onChange={(e) => setSignupForm({ ...signupForm, fullName: e.target.value })}
                         disabled={isSignupLoading}

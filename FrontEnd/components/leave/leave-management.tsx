@@ -1178,8 +1178,14 @@ import {
   rejectLeaveRequest,
   cancelLeaveRequest,
   getLeaveRequest,
-  bulkProcessLeaves
+  bulkProcessLeaves,
+  getApiErrorMessage,
 } from "@/lib/api"
+import {
+  formatLeaveDate,
+  normalizeLeaveList,
+  normalizeLeaveRequest,
+} from "@/lib/leave-utils"
 import { LeaveRequestType } from "../types/leave"
 import { format } from "date-fns"
 import { useAuth } from "../context/auth"
@@ -1240,7 +1246,9 @@ export function LeaveManagement() {
       }
       
       if (response.success && response.data) {
-        const requests = response.data.leaveRequests || response.data
+        const requests = normalizeLeaveList(
+          response.data.leaveRequests ?? response.data
+        )
         
         // Apply date range filter if both dates are selected
         let filteredRequests = requests
@@ -1323,11 +1331,10 @@ export function LeaveManagement() {
       } else {
         throw new Error(response.message || "Failed to submit leave request")
       }
-    } catch (error: any) {
-      console.log("error", error);
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error || "Failed to submit leave request",
+        description: getApiErrorMessage(error, "Failed to submit leave request"),
         variant: "destructive"
       })
     }
@@ -1349,10 +1356,10 @@ export function LeaveManagement() {
       } else {
         throw new Error(response.message || "Failed to approve leave request")
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error || "Failed to approve leave request",
+        description: getApiErrorMessage(error, "Failed to approve leave request"),
         variant: "destructive"
       })
     }
@@ -1385,10 +1392,10 @@ export function LeaveManagement() {
       } else {
         throw new Error(response.message || "Failed to reject leave request")
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error || "Failed to reject leave request",
+        description: getApiErrorMessage(error, "Failed to reject leave request"),
         variant: "destructive"
       })
     }
@@ -1408,10 +1415,10 @@ export function LeaveManagement() {
       } else {
         throw new Error(response.message || "Failed to cancel leave request")
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error || "Failed to cancel leave request",
+        description: getApiErrorMessage(error, "Failed to cancel leave request"),
         variant: "destructive"
       })
     }
@@ -1423,15 +1430,17 @@ export function LeaveManagement() {
       const response = await getLeaveRequest(id)
       
       if (response.success && response.data) {
-        setSelectedRequest(response.data)
+        setSelectedRequest(
+          normalizeLeaveRequest(response.data as Record<string, unknown>)
+        )
         setViewOpen(true)
       } else {
         throw new Error("Failed to load leave request details")
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error || "Failed to load leave request details",
+        description: getApiErrorMessage(error, "Failed to load leave request details"),
         variant: "destructive"
       })
     }
@@ -1497,11 +1506,10 @@ export function LeaveManagement() {
       
       fetchLeaveRequests()
       setSelectedRequests([])
-    } catch (error: any) {
-      console.log("error12", error);
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error || `Failed to ${bulkAction} leave requests`,
+        description: getApiErrorMessage(error, `Failed to ${bulkAction} leave requests`),
         variant: "destructive"
       })
     }
@@ -1524,12 +1532,12 @@ export function LeaveManagement() {
           `"${employeeName}"`,
           employeeId,
           request.leave_type,
-          format(new Date(request.start_date), 'yyyy-MM-dd'),
-          format(new Date(request.end_date), 'yyyy-MM-dd'),
+          formatLeaveDate(request.start_date, 'yyyy-MM-dd'),
+          formatLeaveDate(request.end_date, 'yyyy-MM-dd'),
           request.number_of_days,
           `"${request.reason.replace(/"/g, '""')}"`,
           request.status,
-          format(new Date(request.createdAt), 'yyyy-MM-dd')
+          formatLeaveDate(request.createdAt, 'yyyy-MM-dd')
         ].join(",")
       }),
     ].join("\n")
@@ -1962,7 +1970,7 @@ export function LeaveManagement() {
               <p className="mt-2 text-sm text-muted-foreground">
                 {filters.start_date && filters.end_date ? (
                   <>
-                    No leave requests found from {format(new Date(filters.start_date), 'dd MMM yyyy')} to {format(new Date(filters.end_date), 'dd MMM yyyy')}
+                    No leave requests found from {formatLeaveDate(filters.start_date, 'dd MMM yyyy')} to {formatLeaveDate(filters.end_date, 'dd MMM yyyy')}
                   </>
                 ) : (
                   `No ${activeTab === 'all' ? '' : activeTab} leave requests found`
@@ -2027,10 +2035,10 @@ export function LeaveManagement() {
                         {renderLeaveTypeBadge(request.leave_type)}
                       </TableCell>
                       <TableCell>
-                        {format(new Date(request.start_date), 'dd MMM yyyy')}
+                        {formatLeaveDate(request.start_date, 'dd MMM yyyy')}
                       </TableCell>
                       <TableCell>
-                        {format(new Date(request.end_date), 'dd MMM yyyy')}
+                        {formatLeaveDate(request.end_date, 'dd MMM yyyy')}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">
@@ -2041,7 +2049,7 @@ export function LeaveManagement() {
                         {renderStatusBadge(request.status)}
                       </TableCell>
                       <TableCell>
-                        {format(new Date(request.createdAt), 'dd MMM yyyy')}
+                        {formatLeaveDate(request.createdAt, 'dd MMM yyyy')}
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
@@ -2191,13 +2199,13 @@ export function LeaveManagement() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Start Date</p>
                   <p className="text-base">
-                    {format(new Date(selectedRequest.start_date), 'dd MMM yyyy')}
+                    {formatLeaveDate(selectedRequest.start_date, 'dd MMM yyyy')}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">End Date</p>
                   <p className="text-base">
-                    {format(new Date(selectedRequest.end_date), 'dd MMM yyyy')}
+                    {formatLeaveDate(selectedRequest.end_date, 'dd MMM yyyy')}
                   </p>
                 </div>
                 <div>
@@ -2207,7 +2215,7 @@ export function LeaveManagement() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Applied Date</p>
                   <p className="text-base">
-                    {format(new Date(selectedRequest.createdAt), 'dd MMM yyyy')}
+                    {formatLeaveDate(selectedRequest.createdAt, 'dd MMM yyyy')}
                   </p>
                 </div>
                 {selectedRequest.approved_by && (
@@ -2222,7 +2230,7 @@ export function LeaveManagement() {
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Approved At</p>
                     <p className="text-base">
-                      {format(new Date(selectedRequest.approved_at), 'dd MMM yyyy, hh:mm a')}
+                      {formatLeaveDate(selectedRequest.approved_at, 'dd MMM yyyy, hh:mm a')}
                     </p>
                   </div>
                 )}

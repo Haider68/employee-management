@@ -494,7 +494,7 @@ export function ProjectManagement() {
         <Card className="shadow-sm col-span-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center">
-              <IndianRupee className="h-4 w-4 mr-2" /> Total Budget
+              <span className="mr-2 font-medium">Rs</span> Total Budget
             </CardTitle>
           </CardHeader>
           <CardContent>

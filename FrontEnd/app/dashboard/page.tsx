@@ -163,9 +163,9 @@ function DashboardContent() {
         setRecentProjects(projects.slice(0, 4))
         
         const total = projects.length
-        const active = projects.filter((proj: any) => proj.status === 'active').length
+        const active = projects.filter((proj: any) => ['planning', 'in-progress', 'on-hold'].includes(proj.status)).length
         const completed = projects.filter((proj: any) => proj.status === 'completed').length
-        const onHold = projects.filter((proj: any) => proj.status === 'onHold').length
+        const onHold = projects.filter((proj: any) => proj.status === 'on-hold').length
         const cancelled = projects.filter((proj: any) => proj.status === 'cancelled').length
         
         const highPriority = projects.filter((proj: any) => proj.priority === 'high' || proj.priority === 'critical').length

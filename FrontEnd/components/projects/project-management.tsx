@@ -35,7 +35,8 @@ import {
   getProjectStats,
   addTeamMember,
   removeTeamMember,
-  getAllEmployees
+  getAllEmployees,
+  getApiErrorMessage,
 } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -186,7 +187,7 @@ export function ProjectManagement() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create project",
+        description: getApiErrorMessage(error, "Failed to create project"),
         variant: "destructive"
       })
     }
@@ -212,7 +213,7 @@ export function ProjectManagement() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update project",
+        description: getApiErrorMessage(error, "Failed to update project"),
         variant: "destructive"
       })
     }
@@ -236,7 +237,7 @@ export function ProjectManagement() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to delete project",
+        description: getApiErrorMessage(error, "Failed to delete project"),
         variant: "destructive"
       })
     }

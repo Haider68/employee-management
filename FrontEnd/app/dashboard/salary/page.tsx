@@ -22,9 +22,10 @@ export default function SalaryPage() {
       const token = localStorage.getItem("token")
       
       const userId = (user as any)?.data?.user?._id || (user as any)?._id
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") || ""
       const url = isAdmin 
-        ? "http://localhost:5000/api/v1/salary/records"
-        : `http://localhost:5000/api/v1/salary/records?employeeId=${userId}`
+        ? `${baseUrl}/salary/records`
+        : `${baseUrl}/salary/records?employeeId=${userId}`
 
       const res = await fetch(url, {
         headers: {
@@ -46,7 +47,8 @@ export default function SalaryPage() {
   const markAsPaid = async (id: string) => {
     try {
       const token = localStorage.getItem("token")
-      const res = await fetch(`http://localhost:5000/api/v1/salary/records/${id}/status`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") || ""
+      const res = await fetch(`${baseUrl}/salary/records/${id}/status`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -70,7 +72,8 @@ export default function SalaryPage() {
 
     try {
       const token = localStorage.getItem("token")
-      await fetch("http://localhost:5000/api/v1/salary/process-all", {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") || ""
+      await fetch(`${baseUrl}/salary/process-all`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

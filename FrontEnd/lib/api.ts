@@ -54,6 +54,32 @@ const handleApi = async (promise: Promise<any>) => {
    }
 };
 
+const normalizeProjectPayload = (formData: any) => {
+  const teamMembers = Array.isArray(formData?.teamMembers)
+    ? formData.teamMembers
+        .map((member: any) => {
+          if (typeof member === "object" && member !== null) {
+            return Number(member.employeeId ?? member._id ?? member.id ?? member);
+          }
+          return Number(member);
+        })
+        .filter((value: number) => Number.isFinite(value) && value > 0)
+    : [];
+
+  return {
+    projectName: formData?.projectName ?? "",
+    client: formData?.client ?? "",
+    startDate: formData?.startDate ? new Date(formData.startDate).toISOString() : undefined,
+    deadline: formData?.deadline ? new Date(formData.deadline).toISOString() : undefined,
+    projectDescription: formData?.projectDescription ?? null,
+    status: formData?.status ?? "planning",
+    priority: formData?.priority ?? "medium",
+    budget: Number(formData?.budget ?? 0),
+    tags: Array.isArray(formData?.tags) ? formData.tags.filter(Boolean) : [],
+    teamMembers,
+  };
+};
+
 
 export const getData = async (url: string) => {
    try {
@@ -160,7 +186,12 @@ export const updateEmployee = async(id: any, formData: any) => {
 }
 
 export const getAllEmployees = async(filters: any) => {
-   return handleApi(getData(`/employee/get-all-employees?status=${filters.status}&department=${filters.department}`))
+   const queryParams = new URLSearchParams()
+   if (filters?.status) queryParams.append('status', filters.status)
+   if (filters?.department) queryParams.append('department', filters.department)
+   const queryString = queryParams.toString()
+   const url = `/employee/get-all-employees${queryString ? `?${queryString}` : ''}`
+   return handleApi(getData(url))
 }
 
 
@@ -181,17 +212,20 @@ export const changeEmployeeStatus = async(id: any, status: any) => {
 // =========================Project =========================
 
 export const createProject = async(formData: any) => {
-   return handleApi(postData('/project/create-project', formData))
+   return handleApi(postData('/project/create-project', normalizeProjectPayload(formData)))
 }  
 
 
 export const updateProject = async(id: any, formData: any) => {
-   return handleApi(putDataWIthId(`/project/update-project/${id}`, formData))
+   return handleApi(putDataWIthId(`/project/update-project/${id}`, normalizeProjectPayload(formData)))
 }
 
 
 export const getAllProjects = async(filters: any) => {
-   return handleApi(getData(`/project/get-all-projects?status=${filters.status}`))
+   const queryParams = new URLSearchParams()
+   if (filters?.status) queryParams.append('status', filters.status)
+   const queryString = queryParams.toString()
+   return handleApi(getData(`/project/get-all-projects${queryString ? `?${queryString}` : ''}`))
 }
 
 

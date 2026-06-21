@@ -156,19 +156,26 @@ export function AddProjectForm({ onSubmit, onCancel, employees }: AddProjectForm
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Prepare data for API
+
+    const currentUserId = localStorage.getItem("userId") || "current-user-id"
+    const teamMembers = formData.teamMembers.length > 0
+      ? formData.teamMembers.filter(Boolean)
+      : [currentUserId]
+
     const submissionData = {
-      ...formData,
-      budget: formData.budget ? parseFloat(formData.budget) : 0,
-      startDate: formData.startDate.toISOString(),
-      deadline: formData.deadline.toISOString(),
-      // Remove empty strings from tags
-      tags: formData.tags.filter(tag => tag.trim() !== ''),
-      // For demo, if no team members selected, add current user
-      teamMembers: formData.teamMembers.length > 0 ? formData.teamMembers : [formData.createdBy]
+      projectName: formData.projectName?.trim() ?? "",
+      client: formData.client?.trim() ?? "",
+      startDate: formData.startDate ? formData.startDate.toISOString() : new Date().toISOString(),
+      deadline: formData.deadline ? formData.deadline.toISOString() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      projectDescription: formData.projectDescription?.trim() ?? "",
+      status: formData.status,
+      priority: formData.priority,
+      budget: Number(formData.budget || 0),
+      tags: formData.tags.filter((tag) => tag && tag.trim() !== ""),
+      teamMembers,
+      attachments: formData.attachments || [],
     }
-    
+
     onSubmit(submissionData)
   }
 

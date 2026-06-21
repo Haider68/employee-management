@@ -142,19 +142,21 @@ export function EditProjectForm({ project, onSubmit, onCancel, employees }: Edit
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Prepare data for API
+
     const submissionData = {
-      ...formData,
-      budget: formData.budget ? parseFloat(formData.budget) : 0,
-      startDate: formData.startDate.toISOString(),
-      deadline: formData.deadline.toISOString(),
-      // Remove empty strings from tags
-      tags: formData.tags.filter(tag => tag.trim() !== ''),
-      // Ensure we have the project ID for update
-      id: project._id
+      projectName: formData.projectName?.trim() ?? "",
+      client: formData.client?.trim() ?? "",
+      startDate: formData.startDate ? formData.startDate.toISOString() : new Date().toISOString(),
+      deadline: formData.deadline ? formData.deadline.toISOString() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      projectDescription: formData.projectDescription?.trim() ?? "",
+      status: formData.status,
+      priority: formData.priority,
+      budget: Number(formData.budget || 0),
+      tags: formData.tags.filter((tag) => tag && tag.trim() !== ""),
+      teamMembers: formData.teamMembers.filter(Boolean),
+      id: project?._id,
     }
-    
+
     onSubmit(submissionData)
   }
 

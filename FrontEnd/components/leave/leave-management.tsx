@@ -1205,6 +1205,7 @@ export function LeaveManagement() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
+  const [submitErrorMessage, setSubmitErrorMessage] = useState("")
   const [selectedRequests, setSelectedRequests] = useState<string[]>([])
   const [bulkAction, setBulkAction] = useState<"approve" | "reject">("approve")
   const [showFilters, setShowFilters] = useState(false)
@@ -1322,6 +1323,7 @@ export function LeaveManagement() {
       const response = await createLeaveRequest(formData)
       
       if (response.success) {
+        setSubmitErrorMessage("")
         toast({
           title: "Success",
           description: "Leave request submitted successfully",
@@ -1329,14 +1331,12 @@ export function LeaveManagement() {
         setDialogOpen(false)
         fetchLeaveRequests()  
       } else {
-        throw new Error(response.message || "Failed to submit leave request")
+        const message = response.message || "Failed to submit leave request"
+        setSubmitErrorMessage(message)
       }
     } catch (error: unknown) {
-      toast({
-        title: "Error",
-        description: getApiErrorMessage(error, "Failed to submit leave request"),
-        variant: "destructive"
-      })
+      const message = getApiErrorMessage(error, "Failed to submit leave request")
+      setSubmitErrorMessage(message)
     }
   }
 
@@ -1728,7 +1728,10 @@ export function LeaveManagement() {
           {
             isAdmin ? "" :  <Button 
             className="bg-sky-600 hover:bg-sky-700" 
-            onClick={() => setDialogOpen(true)}
+            onClick={() => {
+              setSubmitErrorMessage("")
+              setDialogOpen(true)
+            }}
           >
             <Plus className="h-4 w-4 mr-2" /> Apply for Leave
           </Button>
@@ -2150,14 +2153,21 @@ export function LeaveManagement() {
       </Card>
 
       {/* Apply for Leave Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={(open) => {
+        setDialogOpen(open)
+        if (!open) setSubmitErrorMessage("")
+      }}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Apply for Leave</DialogTitle>
           </DialogHeader>
           <AddLeaveRequestForm 
             onSubmit={handleAddLeaveRequest} 
-            onCancel={() => setDialogOpen(false)}
+            onCancel={() => {
+              setDialogOpen(false)
+              setSubmitErrorMessage("")
+            }}
+            serverError={submitErrorMessage}
           />
         </DialogContent>
       </Dialog>

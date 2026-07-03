@@ -565,11 +565,11 @@ function DashboardContent() {
                   {/* Tags */}
                   {project.tags && project.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
-                      {project.tags.map((tag: string, idx: number) => (
+                      {/* {project.tags.map((tag: string, idx: number) => (
                         <span key={idx} className="text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
                           #{tag}
                         </span>
-                      ))}
+                      ))} */}
                     </div>
                   )}
 

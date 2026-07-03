@@ -490,6 +490,42 @@ export const updateEmployeePassword = async(formData: any) => {
    return handleApi(putData(`/employee/update-password`, formData))
 }
 
+// ======================================= Chat =====================
+
+export type ChatHistoryItem = { role: string; content: string }
+
+export type ChatMessagePayload = {
+  message: string
+  history: ChatHistoryItem[]
+}
+
+export type ChatMessageResponseData = {
+  reply: string
+  message?: string
+  executedQueries?: unknown[]
+  rowCount?: number
+}
+
+export type ChatMessageResponse = {
+  success: boolean
+  message: string
+  data: ChatMessageResponseData
+}
+
+export function extractChatReply(response: ChatMessageResponse): string {
+  const reply = response?.data?.reply ?? response?.data?.message
+  if (!reply?.trim()) {
+    throw new Error("No response received from the assistant.")
+  }
+  return reply.trim()
+}
+
+export const sendChatMessage = async (
+  payload: ChatMessagePayload
+): Promise<ChatMessageResponse> => {
+  return handleApi(postData("/chat/message", payload))
+}
+
 
 
 

@@ -22,6 +22,7 @@ export function middleware(request: NextRequest) {
     "/dashboard/analytics",
     "/dashboard/about",
     "/dashboard/contact",
+    "/dashboard/chat",
   ];
 
   const isAdminRoute = adminOnlyRoutes.some((route) =>

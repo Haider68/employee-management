@@ -15,6 +15,7 @@ import {
   X,
   Home,
   FileText,
+  MessageSquare,
 } from "lucide-react"
 import { useLayout } from "@/components/layout/layout-provider"
 import { useAuth } from "./context/auth"
@@ -34,6 +35,7 @@ const allSidebarItems = [
   { name: "Contact Us", href: "/dashboard/contact", icon: FileText },
   // { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  { name: "AI Chat", href: "/dashboard/chat", icon: MessageSquare },
 ]
 
 const employeeSidebarItems = [
